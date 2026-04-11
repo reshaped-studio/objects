@@ -1,0 +1,480 @@
+{
+  "identity": {
+    "slug": "job-listing",
+    "name": "Job Listing",
+    "objectType": "domain",
+    "category": "content",
+    "definition": "A time-bound federal vacancy announcement for a specific position at a specific agency.",
+    "products": ["usajobs"]
+  },
+
+  "sipValidation": {
+    "structure": {
+      "pass": true,
+      "evidence": "positionTitle, announcementNumber, openDate, closeDate, salary, location, duties, qualifications, status, applyUrl — sufficient for a full detail page."
+    },
+    "instances": {
+      "pass": true,
+      "evidence": "IT Specialist GS-13 at Dept of Defense; Park Ranger GS-7 at National Park Service; Border Patrol Agent GS-11 at CBP."
+    },
+    "purpose": {
+      "pass": true,
+      "evidence": "Job seekers browse and evaluate listings to decide whether to apply."
+    },
+    "verdict": "Valid object. Time-bound, agency-specific, and navigable with a full detail page."
+  },
+
+  "synonyms": [
+    {
+      "term": "vacancy announcement",
+      "context": "Federal HR and OPM documentation",
+      "notes": "Formal term used in hiring regulations. Interchangeable with Job Listing in this system."
+    },
+    {
+      "term": "job announcement",
+      "context": "USAJobs Help Center and applicant-facing copy",
+      "notes": "Plain-language variant used on USAJobs.gov."
+    },
+    {
+      "term": "JOA",
+      "context": "Federal HR practitioners and agency HR staff",
+      "notes": "Acronym for Job Opportunity Announcement. Not used in applicant-facing copy."
+    }
+  ],
+
+  "attributes": [
+    {
+      "name": "positionTitle",
+      "dataType": "string",
+      "required": true,
+      "source": "API",
+      "description": "The title of the position as defined by the hiring agency.",
+      "example": "IT Specialist (INFOSEC)"
+    },
+    {
+      "name": "announcementNumber",
+      "dataType": "string",
+      "required": true,
+      "source": "API",
+      "description": "The public-facing identifier for the listing, assigned by the agency.",
+      "example": "HHS-FDA-2026-001"
+    },
+    {
+      "name": "status",
+      "dataType": "enum",
+      "required": true,
+      "source": "API",
+      "description": "The current state of the listing.",
+      "enumOptions": ["Open", "Closed", "Cancelled"]
+    },
+    {
+      "name": "closingType",
+      "dataType": "enum",
+      "required": true,
+      "source": "API",
+      "description": "How the listing closes. Determines whether closeDate is present.",
+      "enumOptions": ["On date", "Number of applicants", "Continuous"]
+    },
+    {
+      "name": "totalOpenings",
+      "dataType": "string",
+      "required": true,
+      "source": "API",
+      "description": "The number of available positions, or a qualitative indicator when the exact count is not disclosed.",
+      "example": "3"
+    },
+    {
+      "name": "openDate",
+      "dataType": "date",
+      "required": true,
+      "source": "API",
+      "description": "The date applications opened.",
+      "example": "2026-03-15"
+    },
+    {
+      "name": "closeDate",
+      "dataType": "date",
+      "required": false,
+      "source": "API",
+      "description": "The application deadline. Absent when closingType is Continuous.",
+      "example": "2026-04-15"
+    },
+    {
+      "name": "workSchedule",
+      "dataType": "enum",
+      "required": true,
+      "source": "API",
+      "description": "The employment schedule for the position.",
+      "enumOptions": ["Full-time", "Part-time", "Shift", "Intermittent"]
+    },
+    {
+      "name": "appointmentType",
+      "dataType": "enum",
+      "required": true,
+      "source": "API",
+      "description": "The duration and nature of the appointment.",
+      "enumOptions": ["Permanent", "Temporary", "Term", "Detail"]
+    },
+    {
+      "name": "serviceType",
+      "dataType": "enum",
+      "required": true,
+      "source": "API",
+      "description": "The federal service classification governing the position.",
+      "enumOptions": ["Competitive", "Excepted"]
+    },
+    {
+      "name": "supervisoryStatus",
+      "dataType": "boolean",
+      "required": true,
+      "source": "API",
+      "description": "Whether the role includes supervisory responsibilities."
+    },
+    {
+      "name": "travelRequirement",
+      "dataType": "enum",
+      "required": true,
+      "source": "API",
+      "description": "Expected travel frequency.",
+      "enumOptions": ["None", "Occasional", "Frequent", "Extensive"]
+    },
+    {
+      "name": "relocationAssistance",
+      "dataType": "boolean",
+      "required": true,
+      "source": "API",
+      "description": "Whether relocation expenses are reimbursed."
+    },
+    {
+      "name": "teleworkEligible",
+      "dataType": "boolean",
+      "required": true,
+      "source": "API",
+      "description": "Whether remote work is available for this position."
+    },
+    {
+      "name": "securityClearance",
+      "dataType": "enum",
+      "required": true,
+      "source": "API",
+      "description": "The security clearance level required.",
+      "enumOptions": ["None", "Public Trust", "Secret", "Top Secret", "TS/SCI"]
+    },
+    {
+      "name": "drugTestRequired",
+      "dataType": "boolean",
+      "required": true,
+      "source": "API",
+      "description": "Whether a drug test is required."
+    },
+    {
+      "name": "whoMayApply",
+      "dataType": "string",
+      "required": true,
+      "source": "API",
+      "description": "Plain-text summary of who is eligible to apply.",
+      "example": "Open to the public"
+    },
+    {
+      "name": "hiringPaths",
+      "dataType": "string",
+      "required": true,
+      "source": "API",
+      "description": "Delimited list of hiring path codes indicating which applicant groups are eligible. References the deferred Hiring Path object. Treated as a string for v1.",
+      "example": "PUBINT"
+    },
+    {
+      "name": "promotionPotential",
+      "dataType": "string",
+      "required": false,
+      "source": "API",
+      "description": "The highest grade this position can reach through non-competitive promotion.",
+      "example": "GS-13"
+    },
+    {
+      "name": "duties",
+      "dataType": "text",
+      "required": true,
+      "source": "API",
+      "description": "Full description of the position's responsibilities."
+    },
+    {
+      "name": "summary",
+      "dataType": "text",
+      "required": false,
+      "source": "API",
+      "description": "Overview paragraph describing the position and agency context."
+    },
+    {
+      "name": "howToApply",
+      "dataType": "text",
+      "required": true,
+      "source": "API",
+      "description": "Instructions for completing and submitting an application."
+    },
+    {
+      "name": "requiredDocuments",
+      "dataType": "text",
+      "required": false,
+      "source": "API",
+      "description": "Documents the applicant must submit with their application."
+    },
+    {
+      "name": "benefits",
+      "dataType": "text",
+      "required": false,
+      "source": "API",
+      "description": "Description of benefits available for this position."
+    },
+    {
+      "name": "applyUrl",
+      "dataType": "string",
+      "required": true,
+      "source": "API",
+      "description": "URL to the agency's external application system. The redesign links here; it does not accept applications.",
+      "example": "https://apply.usastaffing.gov/Application/Apply"
+    }
+  ],
+
+  "actions": [
+    {
+      "name": "Apply",
+      "priority": "P",
+      "roles": ["job-seeker"],
+      "permission": "read",
+      "description": "Links to the agency's external application system. Not a POST. The redesign does not accept applications.",
+      "crossObject": {
+        "slug": "agency",
+        "name": "Agency"
+      }
+    },
+    {
+      "name": "Save listing",
+      "priority": "S",
+      "roles": ["authenticated-job-seeker"],
+      "permission": "read",
+      "description": "Saves the listing for later review. Requires state persistence."
+    },
+    {
+      "name": "Share listing",
+      "priority": "T",
+      "roles": ["job-seeker"],
+      "permission": "read",
+      "description": "Copies or shares a direct URL to the listing."
+    },
+    {
+      "name": "View similar listings",
+      "priority": "T",
+      "roles": ["job-seeker"],
+      "permission": "read",
+      "description": "Navigates to a filtered list of listings in the same occupational series and location.",
+      "crossObject": {
+        "slug": "job-listing",
+        "name": "Job Listing"
+      }
+    },
+    {
+      "name": "Check eligibility",
+      "priority": "T",
+      "roles": ["job-seeker"],
+      "permission": "read",
+      "description": "Surfaces whether the job seeker's hiring path matches the listing's requirements."
+    },
+    {
+      "name": "Print / export listing",
+      "priority": "Q",
+      "roles": ["job-seeker"],
+      "permission": "read",
+      "description": "Produces a printable or exportable version of the listing."
+    }
+  ],
+
+  "relationships": [
+    {
+      "targetSlug": "agency",
+      "targetName": "Agency",
+      "mechanics": "Automatic. Agency code on the listing maps to the Agency object via the API. Set when the listing is published. Read-only from the redesign side.",
+      "cardinality": "many-to-one (one Agency has many Job Listings; one listing belongs to one agency)",
+      "sorts": "Default: openDate descending. Options: closeDate ascending, salary descending.",
+      "filters": "Series, location, grade, appointment type, work schedule, telework eligibility.",
+      "dependencies": "Required. A listing cannot exist without an agency. If agency data is unavailable, the listing renders in a degraded state (name only, no logo or description). No cascade — orphaned listings are not deleted."
+    },
+    {
+      "targetSlug": "occupational-series",
+      "targetName": "Occupational Series",
+      "mechanics": "Automatic. Series code on the listing maps to the Occupational Series object via the API.",
+      "cardinality": "many-to-one (one Occupational Series has many Job Listings; one listing belongs to one series)",
+      "sorts": "Default: openDate descending. Options: salary descending, grade descending, closeDate ascending.",
+      "filters": "Agency, location, grade, appointment type, telework eligibility.",
+      "dependencies": "Required. A listing must have a valid series code."
+    },
+    {
+      "targetSlug": "location",
+      "targetName": "Location",
+      "mechanics": "Automatic. One or more location records on the listing map to Location objects via the API.",
+      "cardinality": "many-to-many (one Location has many Job Listings; one listing can be at multiple Locations — typically 1 to 3, up to dozens for nationwide postings)",
+      "sorts": "Default: openDate descending. Options: salary descending, grade descending, series alphabetical.",
+      "filters": "Series, agency, grade, appointment type, telework eligibility.",
+      "dependencies": "Required unless teleworkEligible is true. A fully remote listing may have no physical location. No cascade — if location data changes, listings retain their recorded location values."
+    },
+    {
+      "targetSlug": "salary-range",
+      "targetName": "Salary Range",
+      "mechanics": "Automatic. Grade and pay scale on the listing map to the Salary Range object via the API.",
+      "cardinality": "many-to-one (one Salary Range covers many Job Listings; one listing has one Salary Range)",
+      "sorts": "Default: openDate descending. Options: grade descending, series alphabetical.",
+      "filters": "Series, agency, location.",
+      "dependencies": "Required. A listing must have salary information."
+    }
+  ],
+
+  "nestedObjects": [
+    {
+      "slug": "qualification",
+      "name": "Qualification",
+      "cardinality": "many",
+      "description": "Experience and education requirements for the position, organized by grade level. Qualifications have no existence outside a specific listing."
+    }
+  ],
+
+  "views": [
+    {
+      "viewType": "list",
+      "context": "A Job Listing in search results.",
+      "userIntent": "Scan listings to find ones worth reading in full.",
+      "shapes": {
+        "list": {
+          "visibleAttributes": [
+            "positionTitle",
+            "status",
+            "closeDate",
+            "appointmentType",
+            "workSchedule",
+            "teleworkEligible",
+            "announcementNumber"
+          ],
+          "availableActions": ["Apply", "Save listing"]
+        }
+      }
+    },
+    {
+      "viewType": "detail",
+      "context": "A Job Listing reviewed by a job seeker.",
+      "userIntent": "Determine whether the position is worth applying for.",
+      "visibleAttributes": [
+        "positionTitle",
+        "announcementNumber",
+        "status",
+        "closingType",
+        "totalOpenings",
+        "openDate",
+        "closeDate",
+        "workSchedule",
+        "appointmentType",
+        "serviceType",
+        "supervisoryStatus",
+        "travelRequirement",
+        "relocationAssistance",
+        "teleworkEligible",
+        "securityClearance",
+        "drugTestRequired",
+        "whoMayApply",
+        "hiringPaths",
+        "promotionPotential",
+        "duties",
+        "summary",
+        "howToApply",
+        "requiredDocuments",
+        "benefits",
+        "applyUrl"
+      ],
+      "availableActions": [
+        "Apply",
+        "Save listing",
+        "Share listing",
+        "View similar listings",
+        "Check eligibility",
+        "Print / export listing"
+      ]
+    }
+  ],
+
+  "stories": [
+    {
+      "title": "First-time applicant evaluates a listing",
+      "role": "job-seeker",
+      "action": "reads",
+      "object": "Job Listing",
+      "benefit": "understands whether they are eligible and what the role involves before investing time in an application",
+      "whenClause": "When a job seeker opens a listing from search results",
+      "thenClause": "They can see the position title, salary, location, qualifications, and a direct path to apply"
+    },
+    {
+      "title": "Job seeker saves a listing to review later",
+      "role": "authenticated-job-seeker",
+      "action": "saves",
+      "object": "Job Listing",
+      "benefit": "can return to promising listings without repeating the search",
+      "whenClause": "When a job seeker wants to compare multiple listings before deciding",
+      "thenClause": "The listing appears in their saved listings for later review"
+    }
+  ],
+
+  "businessRules": [
+    {
+      "title": "Apply requires Open status",
+      "description": "Apply is only available when status is Open and applyUrl is present. If either condition is not met, Apply is hidden and the primary CTA falls back to Save listing."
+    },
+    {
+      "title": "closeDate conditional on closingType",
+      "description": "closeDate is required unless closingType is Continuous. Continuous listings have no fixed deadline."
+    },
+    {
+      "title": "Location or remote required",
+      "description": "At least one Location is required, or teleworkEligible must be true. A listing cannot have neither."
+    },
+    {
+      "title": "At least one Qualification required",
+      "description": "Every listing must have at least one Qualification nested object."
+    },
+    {
+      "title": "No submission",
+      "description": "The redesign does not accept applications. Apply always links out to the agency's external system. The redesign cannot POST back to USAJobs or any agency system."
+    },
+    {
+      "title": "One primary CTA per role",
+      "description": "Job seekers have one primary CTA: Apply. If Apply is unavailable (status is not Open or applyUrl is absent), the primary CTA is Save listing."
+    }
+  ],
+
+  "lifecycle": {
+    "states": [
+      {
+        "name": "Open",
+        "description": "The listing is accepting applications.",
+        "triggers": "openDate is reached.",
+        "variant": "active"
+      },
+      {
+        "name": "Closed",
+        "description": "The listing is no longer accepting applications.",
+        "triggers": "closeDate is reached, the applicant limit is hit, or the agency closes the listing manually.",
+        "variant": "default"
+      },
+      {
+        "name": "Cancelled",
+        "description": "The listing was withdrawn before it closed.",
+        "triggers": "The agency cancels the listing.",
+        "variant": "warn"
+      }
+    ],
+    "transitions": [
+      {
+        "from": "Open",
+        "to": ["Closed", "Cancelled"]
+      }
+    ]
+  },
+
+  "relatedObjects": []
+}

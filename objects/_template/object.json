@@ -1,0 +1,80 @@
+{
+  "identity": {
+    "slug": "object-slug",
+    "name": "Object Name",
+    "objectType": "domain",
+    "category": "knowledge",
+    "definition": "One sentence plain-language definition of what this object is.",
+    "products": ["product-name"]
+  },
+  "sipValidation": {
+    "structure": {
+      "pass": true,
+      "evidence": "Describe what attributes confirm this object has internal structure."
+    },
+    "instances": {
+      "pass": true,
+      "evidence": "Name two or three distinct real-world instances."
+    },
+    "purpose": {
+      "pass": true,
+      "evidence": "Explain why a user seeks this object out and what they do with it."
+    },
+    "verdict": "Valid object. One sentence summary of why."
+  },
+  "attributes": [
+    {
+      "name": "attributeName",
+      "dataType": "string",
+      "required": true,
+      "source": "API",
+      "description": "What this attribute represents and why it matters to the user.",
+      "example": "A concrete real-world example value."
+    }
+  ],
+  "actions": [
+    {
+      "name": "Primary action",
+      "priority": "P",
+      "roles": ["user"],
+      "permission": "read",
+      "description": "What happens when this action is performed."
+    }
+  ],
+  "relationships": [],
+  "nestedObjects": [],
+  "views": [
+    {
+      "viewType": "list",
+      "context": "Describe the scanning context. Where is the user? What are they looking at?",
+      "userIntent": "What is the user trying to accomplish in this context?",
+      "shapes": {
+        "list": {
+          "visibleAttributes": ["attributeName"],
+          "availableActions": ["Primary action"]
+        }
+      }
+    },
+    {
+      "viewType": "detail",
+      "context": "Describe the focus context. What brought the user here?",
+      "userIntent": "What is the user trying to accomplish?",
+      "visibleAttributes": ["attributeName"],
+      "availableActions": ["Primary action"]
+    }
+  ],
+  "stories": [],
+  "businessRules": [],
+  "lifecycle": {
+    "states": [
+      {
+        "name": "Active",
+        "description": "The object is available and in use.",
+        "triggers": "Object is created.",
+        "variant": "active"
+      }
+    ],
+    "transitions": []
+  },
+  "relatedObjects": []
+}

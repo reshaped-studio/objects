@@ -1,0 +1,209 @@
+{
+  "identity": {
+    "slug": "location",
+    "name": "Location",
+    "objectType": "domain",
+    "category": "knowledge",
+    "definition": "A geographic duty station where one or more federal positions are based.",
+    "products": ["usajobs"]
+  },
+
+  "sipValidation": {
+    "structure": {
+      "pass": true,
+      "evidence": "city, state, country, region, remoteEligible, activeListingCount, coordinates — sufficient for a detail page and map display."
+    },
+    "instances": {
+      "pass": true,
+      "evidence": "Washington DC; Fort Bragg, NC; Anchorage, AK."
+    },
+    "purpose": {
+      "pass": true,
+      "evidence": "Job seekers filter and browse by location to find positions near them or in a target city."
+    },
+    "verdict": "Valid object. Clear structure, named instances, and a primary navigation role in job discovery."
+  },
+
+  "synonyms": [
+    {
+      "term": "duty station",
+      "context": "Federal HR and position descriptions",
+      "notes": "Formal term for the location where an employee is assigned to work."
+    },
+    {
+      "term": "work location",
+      "context": "Applicant-facing copy",
+      "notes": "Plain-language variant."
+    }
+  ],
+
+  "attributes": [
+    {
+      "name": "city",
+      "dataType": "string",
+      "required": true,
+      "source": "API",
+      "description": "The city name.",
+      "example": "Washington"
+    },
+    {
+      "name": "state",
+      "dataType": "string",
+      "required": false,
+      "source": "API",
+      "description": "The two-letter state or territory code. Absent for international locations.",
+      "example": "DC"
+    },
+    {
+      "name": "country",
+      "dataType": "string",
+      "required": true,
+      "source": "API",
+      "description": "The country name.",
+      "example": "United States"
+    },
+    {
+      "name": "region",
+      "dataType": "string",
+      "required": false,
+      "source": "computed",
+      "description": "A geographic grouping derived from state, used for regional filtering.",
+      "example": "Mid-Atlantic"
+    },
+    {
+      "name": "remoteEligible",
+      "dataType": "boolean",
+      "required": false,
+      "source": "computed",
+      "description": "Whether any active listings at this location are flagged as telework-eligible."
+    },
+    {
+      "name": "activeListingCount",
+      "dataType": "number",
+      "required": false,
+      "source": "computed",
+      "description": "Count of currently open Job Listings at this location. Computed at query time."
+    },
+    {
+      "name": "coordinates",
+      "dataType": "string",
+      "required": false,
+      "source": "computed",
+      "description": "Approximate latitude and longitude derived from city and state. Used for map display.",
+      "example": "38.9072,-77.0369"
+    }
+  ],
+
+  "actions": [
+    {
+      "name": "Browse location listings",
+      "priority": "P",
+      "roles": ["job-seeker"],
+      "permission": "read",
+      "description": "Navigates to a filtered list of open Job Listings at this location.",
+      "crossObject": {
+        "slug": "job-listing",
+        "name": "Job Listing"
+      }
+    },
+    {
+      "name": "Share location page",
+      "priority": "S",
+      "roles": ["job-seeker"],
+      "permission": "read",
+      "description": "Copies or shares a direct URL to the location page."
+    }
+  ],
+
+  "relationships": [
+    {
+      "targetSlug": "job-listing",
+      "targetName": "Job Listing",
+      "mechanics": "Automatic. Job Listings carry one or more location records that map to Location objects.",
+      "cardinality": "one-to-many (one Location has many Job Listings; a high-demand location like Washington DC may have thousands)",
+      "sorts": "Default: openDate descending. Options: salary descending, grade descending, series alphabetical.",
+      "filters": "Series, agency, grade, appointment type, telework eligibility.",
+      "dependencies": "Optional for Location. A location can exist with zero active listings. Listings retain their location values if location data changes."
+    }
+  ],
+
+  "nestedObjects": [],
+
+  "views": [
+    {
+      "viewType": "list",
+      "context": "A Location in a browse or search context.",
+      "userIntent": "Find locations with open positions relevant to them.",
+      "shapes": {
+        "list": {
+          "visibleAttributes": ["city", "state", "country", "remoteEligible", "activeListingCount"],
+          "availableActions": ["Browse location listings"]
+        }
+      }
+    },
+    {
+      "viewType": "detail",
+      "context": "A Location detail page visited by a job seeker.",
+      "userIntent": "Browse all open federal positions at a specific location.",
+      "visibleAttributes": [
+        "city",
+        "state",
+        "country",
+        "region",
+        "remoteEligible",
+        "activeListingCount",
+        "coordinates"
+      ],
+      "availableActions": [
+        "Browse location listings",
+        "Share location page"
+      ]
+    }
+  ],
+
+  "stories": [
+    {
+      "title": "Job seeker finds all federal jobs in their city",
+      "role": "job-seeker",
+      "action": "browses",
+      "object": "Location",
+      "benefit": "discovers all open federal positions near them without filtering by agency or series",
+      "whenClause": "When a job seeker wants to stay in a specific city or region",
+      "thenClause": "They see all active listings at that location across all agencies and series"
+    }
+  ],
+
+  "businessRules": [
+    {
+      "title": "Remote positions may have no physical location",
+      "description": "A listing with teleworkEligible = true and no duty station records maps to no Location object. The redesign must handle this case without breaking the Location relationship."
+    },
+    {
+      "title": "coordinates are approximate",
+      "description": "coordinates are derived from city and state and are not precise addresses. They are suitable for map display only."
+    },
+    {
+      "title": "International locations omit state",
+      "description": "Locations outside the United States and territories do not have a state value."
+    }
+  ],
+
+  "lifecycle": {
+    "states": [
+      {
+        "name": "Active",
+        "description": "The location has or has had federal job listings.",
+        "triggers": "A Job Listing references this location.",
+        "variant": "active"
+      }
+    ],
+    "transitions": []
+  },
+
+  "relatedObjects": [
+    {
+      "slug": "agency",
+      "name": "Agency"
+    }
+  ]
+}

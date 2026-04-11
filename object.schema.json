@@ -1,0 +1,565 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://reshaped.studio/schemas/object.schema.json",
+  "title": "ObjectDefinition",
+  "description": "A Reshaped object definition. The canonical structured data for an entry in the Objects library.",
+  "type": "object",
+  "required": [
+    "identity",
+    "sipValidation",
+    "attributes",
+    "actions",
+    "relationships",
+    "nestedObjects",
+    "views",
+    "stories",
+    "businessRules",
+    "lifecycle",
+    "relatedObjects"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "identity": {
+      "type": "object",
+      "description": "Core identifying information for the object.",
+      "required": [
+        "slug",
+        "name",
+        "objectType",
+        "category",
+        "definition",
+        "products"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "slug": {
+          "type": "string",
+          "description": "URL-safe unique identifier. Use kebab-case.",
+          "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+          "examples": ["job-listing", "federal-agency", "application"]
+        },
+        "name": {
+          "type": "string",
+          "description": "Display name of the object.",
+          "examples": ["Job Listing", "Federal Agency"]
+        },
+        "qualifier": {
+          "type": "string",
+          "description": "Optional context modifier for variations. Distinguishes this object from a parent or sibling.",
+          "examples": ["federal", "active", "archived"]
+        },
+        "objectType": {
+          "type": "string",
+          "description": "Whether this object is universal (core), domain-specific (domain), or a variant of another object (variation).",
+          "enum": ["core", "domain", "variation"]
+        },
+        "category": {
+          "type": "string",
+          "description": "The semantic category this object belongs to.",
+          "enum": [
+            "people",
+            "container",
+            "activity",
+            "knowledge",
+            "data-ai",
+            "content",
+            "analytics"
+          ]
+        },
+        "definition": {
+          "type": "string",
+          "description": "One sentence plain-language definition. What is this object, not what it does."
+        },
+        "products": {
+          "type": "array",
+          "description": "Which products or contexts this object appears in.",
+          "items": { "type": "string" },
+          "minItems": 1
+        }
+      }
+    },
+
+    "sipValidation": {
+      "type": "object",
+      "description": "Confirms this is a valid object using the SIP criteria.",
+      "required": ["structure", "instances", "purpose", "verdict"],
+      "additionalProperties": false,
+      "properties": {
+        "structure": {
+          "type": "object",
+          "required": ["pass", "evidence"],
+          "additionalProperties": false,
+          "properties": {
+            "pass": { "type": "boolean" },
+            "evidence": {
+              "type": "string",
+              "description": "What attributes or properties confirm this object has internal structure?"
+            }
+          }
+        },
+        "instances": {
+          "type": "object",
+          "required": ["pass", "evidence"],
+          "additionalProperties": false,
+          "properties": {
+            "pass": { "type": "boolean" },
+            "evidence": {
+              "type": "string",
+              "description": "Name two or three distinct real-world instances of this object."
+            }
+          }
+        },
+        "purpose": {
+          "type": "object",
+          "required": ["pass", "evidence"],
+          "additionalProperties": false,
+          "properties": {
+            "pass": { "type": "boolean" },
+            "evidence": {
+              "type": "string",
+              "description": "Why does a user seek this object out? What do they do with it?"
+            }
+          }
+        },
+        "verdict": {
+          "type": "string",
+          "description": "One sentence summary of the validation result."
+        }
+      }
+    },
+
+    "synonyms": {
+      "type": "array",
+      "description": "Alternative names for this object in different contexts.",
+      "items": {
+        "type": "object",
+        "required": ["term", "context", "notes"],
+        "additionalProperties": false,
+        "properties": {
+          "term": { "type": "string" },
+          "context": {
+            "type": "string",
+            "description": "Where this term is used."
+          },
+          "notes": {
+            "type": "string",
+            "description": "Why it differs from the canonical name."
+          }
+        }
+      }
+    },
+
+    "attributes": {
+      "type": "array",
+      "description": "The data this object is made of. Force-ranked by importance to the user.",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["name", "dataType", "required", "source", "description"],
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Attribute name in camelCase.",
+            "examples": ["positionTitle", "salaryMin", "closingDate"]
+          },
+          "dataType": {
+            "type": "string",
+            "enum": [
+              "string",
+              "number",
+              "boolean",
+              "date",
+              "datetime",
+              "enum",
+              "reference",
+              "image",
+              "text"
+            ]
+          },
+          "required": { "type": "boolean" },
+          "source": {
+            "type": "string",
+            "description": "Where this attribute comes from.",
+            "examples": ["API", "system", "manual", "computed"]
+          },
+          "description": {
+            "type": "string",
+            "description": "What this attribute represents and why it matters."
+          },
+          "example": {
+            "type": "string",
+            "description": "A concrete real-world example value."
+          },
+          "roles": {
+            "type": "array",
+            "description": "Which user roles can see or edit this attribute. Omit if visible to all.",
+            "items": { "type": "string" }
+          },
+          "enumOptions": {
+            "type": "array",
+            "description": "Required when dataType is enum. List all valid values.",
+            "items": { "type": "string" }
+          },
+          "reference": {
+            "type": "object",
+            "description": "Required when dataType is reference. Identifies the target object.",
+            "required": ["slug", "name"],
+            "additionalProperties": false,
+            "properties": {
+              "slug": { "type": "string" },
+              "name": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+
+    "actions": {
+      "type": "array",
+      "description": "What users can do to this object. Force-ranked by priority.",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["name", "priority", "roles", "permission", "description"],
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Action name. Use a verb or verb phrase.",
+            "examples": ["Save job", "Apply", "Share listing"]
+          },
+          "priority": {
+            "type": "string",
+            "enum": ["P", "S", "T", "Q"],
+            "description": "P = primary, S = secondary, T = tertiary, Q = quaternary. One P per object per role."
+          },
+          "roles": {
+            "type": "array",
+            "description": "Which user roles can perform this action.",
+            "items": { "type": "string" },
+            "minItems": 1
+          },
+          "permission": {
+            "type": "string",
+            "description": "Permission level required.",
+            "examples": ["read", "write", "admin", "system"]
+          },
+          "description": {
+            "type": "string",
+            "description": "What happens when this action is performed."
+          },
+          "crossObject": {
+            "type": "object",
+            "description": "If this action creates, modifies, or navigates to another object.",
+            "required": ["slug", "name"],
+            "additionalProperties": false,
+            "properties": {
+              "slug": { "type": "string" },
+              "name": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+
+    "relationships": {
+      "type": "array",
+      "description": "How this object connects to other objects. Uses MCSFD.",
+      "items": {
+        "type": "object",
+        "required": [
+          "targetSlug",
+          "targetName",
+          "mechanics",
+          "cardinality",
+          "sorts",
+          "filters",
+          "dependencies"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "targetSlug": { "type": "string" },
+          "targetName": { "type": "string" },
+          "mechanics": {
+            "type": "string",
+            "description": "How the relationship is created and maintained."
+          },
+          "cardinality": {
+            "type": "string",
+            "description": "One-to-one, one-to-many, or many-to-many. Include typical counts where known.",
+            "examples": ["one-to-many (one Agency has many Job Listings)"]
+          },
+          "sorts": {
+            "type": "string",
+            "description": "Meaningful sort orders when viewing related objects."
+          },
+          "filters": {
+            "type": "string",
+            "description": "Available filters when viewing related objects."
+          },
+          "dependencies": {
+            "type": "string",
+            "description": "What happens when one side is deleted, archived, or deactivated."
+          }
+        }
+      }
+    },
+
+    "nestedObjects": {
+      "type": "array",
+      "description": "Objects that exist within this object and have no meaningful existence outside it.",
+      "items": {
+        "type": "object",
+        "required": ["slug", "name", "cardinality", "description"],
+        "additionalProperties": false,
+        "properties": {
+          "slug": { "type": "string" },
+          "name": { "type": "string" },
+          "cardinality": {
+            "type": "string",
+            "examples": ["one", "many"]
+          },
+          "description": {
+            "type": "string",
+            "description": "Why this object is nested rather than related."
+          }
+        }
+      }
+    },
+
+    "views": {
+      "type": "array",
+      "description": "The contexts in which this object appears. Split into list views (scanning) and detail views (focus).",
+      "minItems": 1,
+      "items": {
+        "oneOf": [
+          {
+            "type": "object",
+            "title": "ListView",
+            "description": "A scanning context. The user is looking across multiple instances of this object.",
+            "required": ["viewType", "context", "userIntent", "shapes"],
+            "additionalProperties": false,
+            "properties": {
+              "viewType": { "type": "string", "enum": ["list"] },
+              "context": {
+                "type": "string",
+                "description": "Describe the situation. Where is the user? What are they looking at?",
+                "examples": ["A Job Listing in search results"]
+              },
+              "userIntent": {
+                "type": "string",
+                "description": "What is the user trying to accomplish in this context?",
+                "examples": ["Find a job that matches my qualifications"]
+              },
+              "shapes": {
+                "type": "object",
+                "description": "The layout forms this view can take. At least one shape is required.",
+                "minProperties": 1,
+                "additionalProperties": false,
+                "properties": {
+                  "list": { "$ref": "#/definitions/ShapeSpec" },
+                  "grid": { "$ref": "#/definitions/ShapeSpec" },
+                  "table": { "$ref": "#/definitions/ShapeSpec" }
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "title": "DetailView",
+            "description": "A focus context. The user is looking at one instance of this object in depth.",
+            "required": [
+              "viewType",
+              "context",
+              "userIntent",
+              "visibleAttributes",
+              "availableActions"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "viewType": { "type": "string", "enum": ["detail"] },
+              "context": {
+                "type": "string",
+                "description": "Describe the situation. What brought the user here?",
+                "examples": ["A Job Listing reviewed by an applicant"]
+              },
+              "userIntent": {
+                "type": "string",
+                "description": "What is the user trying to accomplish?",
+                "examples": ["Understand if this job is worth applying to"]
+              },
+              "visibleAttributes": {
+                "type": "array",
+                "description": "Attribute names visible in this detail view.",
+                "items": { "type": "string" },
+                "minItems": 1
+              },
+              "availableActions": {
+                "type": "array",
+                "description": "Action names available in this detail view.",
+                "items": { "type": "string" }
+              }
+            }
+          }
+        ]
+      }
+    },
+
+    "stories": {
+      "type": "array",
+      "description": "User stories tied to actions on this object.",
+      "items": {
+        "type": "object",
+        "required": [
+          "title",
+          "role",
+          "action",
+          "object",
+          "benefit",
+          "whenClause",
+          "thenClause"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "title": { "type": "string" },
+          "role": { "type": "string" },
+          "action": { "type": "string" },
+          "object": { "type": "string" },
+          "benefit": { "type": "string" },
+          "whenClause": { "type": "string" },
+          "thenClause": { "type": "string" },
+          "crossObjects": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["slug", "name"],
+              "additionalProperties": false,
+              "properties": {
+                "slug": { "type": "string" },
+                "name": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "businessRules": {
+      "type": "array",
+      "description": "Constraints and logic that govern this object's behavior.",
+      "items": {
+        "type": "object",
+        "required": ["title", "description"],
+        "additionalProperties": false,
+        "properties": {
+          "title": { "type": "string" },
+          "description": { "type": "string" }
+        }
+      }
+    },
+
+    "lifecycle": {
+      "type": "object",
+      "description": "The states this object moves through and the transitions between them.",
+      "required": ["states", "transitions"],
+      "additionalProperties": false,
+      "properties": {
+        "states": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["name", "description", "triggers", "variant"],
+            "additionalProperties": false,
+            "properties": {
+              "name": { "type": "string" },
+              "description": { "type": "string" },
+              "triggers": { "type": "string" },
+              "variant": {
+                "type": "string",
+                "enum": ["active", "default", "warn"]
+              }
+            }
+          }
+        },
+        "transitions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["from", "to"],
+            "additionalProperties": false,
+            "properties": {
+              "from": { "type": "string" },
+              "to": {
+                "type": "array",
+                "items": { "type": "string" },
+                "minItems": 1
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "variations": {
+      "type": "array",
+      "description": "Distinct versions of this object with meaningfully different attributes or behavior.",
+      "items": {
+        "type": "object",
+        "required": ["name", "slug", "qualifier", "products", "objectType"],
+        "additionalProperties": false,
+        "properties": {
+          "name": { "type": "string" },
+          "slug": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" },
+          "qualifier": { "type": "string" },
+          "products": {
+            "type": "array",
+            "items": { "type": "string" },
+            "minItems": 1
+          },
+          "objectType": {
+            "type": "string",
+            "enum": ["core", "domain", "variation"]
+          }
+        }
+      }
+    },
+
+    "relatedObjects": {
+      "type": "array",
+      "description": "Objects frequently used alongside this one but not nested or directly related.",
+      "items": {
+        "type": "object",
+        "required": ["slug", "name"],
+        "additionalProperties": false,
+        "properties": {
+          "slug": { "type": "string" },
+          "name": { "type": "string" }
+        }
+      }
+    }
+  },
+
+  "definitions": {
+    "ShapeSpec": {
+      "type": "object",
+      "description": "Which attributes and actions are visible in a specific layout shape.",
+      "required": ["visibleAttributes", "availableActions"],
+      "additionalProperties": false,
+      "properties": {
+        "visibleAttributes": {
+          "type": "array",
+          "description": "Attribute names visible in this shape.",
+          "items": { "type": "string" },
+          "minItems": 1
+        },
+        "availableActions": {
+          "type": "array",
+          "description": "Action names available in this shape.",
+          "items": { "type": "string" }
+        }
+      }
+    }
+  }
+}

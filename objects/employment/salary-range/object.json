@@ -1,0 +1,244 @@
+{
+  "identity": {
+    "slug": "salary-range",
+    "name": "Salary Range",
+    "objectType": "domain",
+    "category": "knowledge",
+    "definition": "The pay band for a federal position, defined by a minimum and maximum salary, pay scale, and grade.",
+    "products": ["usajobs"]
+  },
+
+  "sipValidation": {
+    "structure": {
+      "pass": true,
+      "evidence": "minimumSalary, maximumSalary, salaryType, payScale, payPlan, minimumGrade, maximumGrade, stepRange — a coherent pay bundle with enough structure for a detail page."
+    },
+    "instances": {
+      "pass": true,
+      "evidence": "$82,764 to $107,590 per year (GS-13); $19.47 to $25.32 per hour (WG-7); SES negotiable."
+    },
+    "purpose": {
+      "pass": true,
+      "evidence": "Job seekers filter by salary to establish a pay floor, and use the range to evaluate financial viability before investing in an application."
+    },
+    "verdict": "Valid object. Federal pay complexity justifies standalone definition. Reusable across any redesign involving federal employment."
+  },
+
+  "synonyms": [
+    {
+      "term": "pay range",
+      "context": "Applicant-facing copy",
+      "notes": "Plain-language variant."
+    },
+    {
+      "term": "GS pay grade",
+      "context": "General Schedule positions",
+      "notes": "Specific to GS positions. Not applicable to WG, SES, or other pay plans."
+    }
+  ],
+
+  "attributes": [
+    {
+      "name": "minimumSalary",
+      "dataType": "number",
+      "required": true,
+      "source": "API",
+      "description": "The lower bound of the pay range.",
+      "example": "82764"
+    },
+    {
+      "name": "maximumSalary",
+      "dataType": "number",
+      "required": true,
+      "source": "API",
+      "description": "The upper bound of the pay range.",
+      "example": "107590"
+    },
+    {
+      "name": "salaryType",
+      "dataType": "enum",
+      "required": true,
+      "source": "API",
+      "description": "The payment frequency for the salary values.",
+      "enumOptions": ["Per year", "Per hour", "Without compensation"]
+    },
+    {
+      "name": "payScale",
+      "dataType": "enum",
+      "required": true,
+      "source": "API",
+      "description": "The pay scale system governing this range.",
+      "enumOptions": ["GS", "WG", "SES", "FWS", "Other"]
+    },
+    {
+      "name": "payPlan",
+      "dataType": "string",
+      "required": false,
+      "source": "API",
+      "description": "The specific pay plan code within the pay scale.",
+      "example": "GS"
+    },
+    {
+      "name": "minimumGrade",
+      "dataType": "string",
+      "required": false,
+      "source": "API",
+      "description": "The lowest grade level in this range. Applicable to GS and WG positions.",
+      "example": "13"
+    },
+    {
+      "name": "maximumGrade",
+      "dataType": "string",
+      "required": false,
+      "source": "API",
+      "description": "The highest grade level in this range.",
+      "example": "13"
+    },
+    {
+      "name": "stepRange",
+      "dataType": "string",
+      "required": false,
+      "source": "API",
+      "description": "The GS step range within the grade. Applicable to GS positions only.",
+      "example": "Step 1 to Step 10"
+    }
+  ],
+
+  "actions": [
+    {
+      "name": "Browse listings in range",
+      "priority": "P",
+      "roles": ["job-seeker"],
+      "permission": "read",
+      "description": "Navigates to a filtered list of open Job Listings at this salary range.",
+      "crossObject": {
+        "slug": "job-listing",
+        "name": "Job Listing"
+      }
+    },
+    {
+      "name": "Share salary range page",
+      "priority": "S",
+      "roles": ["job-seeker"],
+      "permission": "read",
+      "description": "Copies or shares a direct URL to the salary range page."
+    }
+  ],
+
+  "relationships": [
+    {
+      "targetSlug": "job-listing",
+      "targetName": "Job Listing",
+      "mechanics": "Automatic. Grade and pay scale on a Job Listing map to this Salary Range object.",
+      "cardinality": "one-to-many (one Salary Range covers many Job Listings at the same grade and pay scale)",
+      "sorts": "Default: openDate descending. Options: grade descending, series alphabetical.",
+      "filters": "Series, agency, location.",
+      "dependencies": "Optional for Salary Range. A range can exist with zero active listings."
+    },
+    {
+      "targetSlug": "occupational-series",
+      "targetName": "Occupational Series",
+      "mechanics": "Derived. The grade range of an Occupational Series implies associated Salary Ranges.",
+      "cardinality": "many-to-many (one series spans multiple grades and thus multiple ranges; one range may apply to many series)",
+      "sorts": "Default: seriesCode ascending.",
+      "filters": "Pay scale.",
+      "dependencies": "Optional. The relationship is informational, not structural."
+    }
+  ],
+
+  "nestedObjects": [],
+
+  "views": [
+    {
+      "viewType": "list",
+      "context": "A Salary Range in a browse or filter context.",
+      "userIntent": "Find salary ranges that meet their pay floor.",
+      "shapes": {
+        "list": {
+          "visibleAttributes": ["minimumSalary", "maximumSalary", "salaryType", "payScale", "minimumGrade", "maximumGrade"],
+          "availableActions": ["Browse listings in range"]
+        }
+      }
+    },
+    {
+      "viewType": "detail",
+      "context": "A Salary Range detail page visited by a job seeker.",
+      "userIntent": "Browse open positions at a specific pay grade.",
+      "visibleAttributes": [
+        "minimumSalary",
+        "maximumSalary",
+        "salaryType",
+        "payScale",
+        "payPlan",
+        "minimumGrade",
+        "maximumGrade",
+        "stepRange"
+      ],
+      "availableActions": [
+        "Browse listings in range",
+        "Share salary range page"
+      ]
+    }
+  ],
+
+  "stories": [
+    {
+      "title": "Job seeker filters positions by minimum salary",
+      "role": "job-seeker",
+      "action": "filters",
+      "object": "Salary Range",
+      "benefit": "avoids spending time on listings that do not meet their pay requirements",
+      "whenClause": "When a job seeker has a minimum salary requirement",
+      "thenClause": "They see only listings at or above their target pay grade"
+    }
+  ],
+
+  "businessRules": [
+    {
+      "title": "minimumSalary must not exceed maximumSalary",
+      "description": "minimumSalary must be less than or equal to maximumSalary. Listings where this is inverted are a data error."
+    },
+    {
+      "title": "Pay rates change annually",
+      "description": "Federal pay tables are updated each year. Salary values reflect the current pay tables as returned by the API. Historical listings may show outdated salary data."
+    },
+    {
+      "title": "SES positions have flexible pay",
+      "description": "Senior Executive Service positions do not follow grade-step tables. minimumGrade and maximumGrade are absent for SES. The salary range is negotiable within the SES pay band."
+    },
+    {
+      "title": "Locality pay is excluded from v1",
+      "description": "Federal locality pay adjustments are not modeled in v1. Displayed salaries are base pay. Users in high-cost areas (e.g. San Francisco, New York) will receive higher pay than shown."
+    }
+  ],
+
+  "lifecycle": {
+    "states": [
+      {
+        "name": "Current",
+        "description": "The salary range reflects the current OPM pay tables.",
+        "triggers": "Pay tables are updated for the current year.",
+        "variant": "active"
+      },
+      {
+        "name": "Historical",
+        "description": "The salary range reflects a previous year's pay tables.",
+        "triggers": "OPM publishes updated pay tables for a new year.",
+        "variant": "default"
+      }
+    ],
+    "transitions": [
+      {
+        "from": "Current",
+        "to": ["Historical"]
+      }
+    ]
+  },
+
+  "relatedObjects": [
+    {
+      "slug": "occupational-series",
+      "name": "Occupational Series"
+    }
+  ]
+}

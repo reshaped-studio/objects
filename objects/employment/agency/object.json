@@ -1,0 +1,275 @@
+{
+  "identity": {
+    "slug": "agency",
+    "name": "Agency",
+    "objectType": "domain",
+    "category": "container",
+    "definition": "A federal department, agency, or sub-element that publishes job listings.",
+    "products": ["usajobs"]
+  },
+
+  "sipValidation": {
+    "structure": {
+      "pass": true,
+      "evidence": "name, code, departmentName, agencyLevel, missionSummary, logoUrl, activeListingCount — sufficient for a full detail page."
+    },
+    "instances": {
+      "pass": true,
+      "evidence": "Department of Defense; National Park Service; Food and Drug Administration."
+    },
+    "purpose": {
+      "pass": true,
+      "evidence": "Job seekers navigate to agencies to browse available positions at organizations they want to work for."
+    },
+    "verdict": "Valid object. Distinct identity, navigable, and a natural hub for Job Listing discovery."
+  },
+
+  "synonyms": [
+    {
+      "term": "department",
+      "context": "Top-level federal organizations, e.g. Department of Defense",
+      "notes": "Department is a specific agencyLevel value, not a synonym for Agency as a whole."
+    },
+    {
+      "term": "bureau",
+      "context": "Sub-elements within an agency, e.g. Bureau of Land Management",
+      "notes": "Bureau is an agencyLevel value. A bureau is an Agency with agencyLevel of sub-element."
+    }
+  ],
+
+  "attributes": [
+    {
+      "name": "name",
+      "dataType": "string",
+      "required": true,
+      "source": "API",
+      "description": "The full name of the agency, department, or sub-element.",
+      "example": "Food and Drug Administration"
+    },
+    {
+      "name": "code",
+      "dataType": "string",
+      "required": true,
+      "source": "API",
+      "description": "The OPM agency code.",
+      "example": "HHS12"
+    },
+    {
+      "name": "departmentName",
+      "dataType": "string",
+      "required": false,
+      "source": "API",
+      "description": "The parent department name. Absent when agencyLevel is Department.",
+      "example": "Department of Health and Human Services"
+    },
+    {
+      "name": "departmentCode",
+      "dataType": "string",
+      "required": false,
+      "source": "API",
+      "description": "The OPM department code. Absent when agencyLevel is Department.",
+      "example": "HHS"
+    },
+    {
+      "name": "subElementName",
+      "dataType": "string",
+      "required": false,
+      "source": "API",
+      "description": "The bureau or office name within the agency. Present only when agencyLevel is Sub-element.",
+      "example": "Center for Drug Evaluation and Research"
+    },
+    {
+      "name": "agencyLevel",
+      "dataType": "enum",
+      "required": true,
+      "source": "API",
+      "description": "The hierarchical level of this agency in the federal structure.",
+      "enumOptions": ["Department", "Agency", "Sub-element"]
+    },
+    {
+      "name": "missionSummary",
+      "dataType": "text",
+      "required": false,
+      "source": "manual",
+      "description": "A one-paragraph plain-language description of the agency's mission. Manually curated — not available from the API."
+    },
+    {
+      "name": "websiteUrl",
+      "dataType": "string",
+      "required": false,
+      "source": "manual",
+      "description": "The official agency website. Manually curated.",
+      "example": "https://www.fda.gov"
+    },
+    {
+      "name": "logoUrl",
+      "dataType": "image",
+      "required": false,
+      "source": "manual",
+      "description": "The agency seal or logo. Manually curated."
+    },
+    {
+      "name": "activeListingCount",
+      "dataType": "number",
+      "required": false,
+      "source": "computed",
+      "description": "Count of currently open Job Listings for this agency. Computed at query time from the API."
+    }
+  ],
+
+  "actions": [
+    {
+      "name": "Browse agency listings",
+      "priority": "P",
+      "roles": ["job-seeker"],
+      "permission": "read",
+      "description": "Navigates to a filtered list of open Job Listings for this agency.",
+      "crossObject": {
+        "slug": "job-listing",
+        "name": "Job Listing"
+      }
+    },
+    {
+      "name": "Follow agency",
+      "priority": "S",
+      "roles": ["authenticated-job-seeker"],
+      "permission": "read",
+      "description": "Subscribes to notifications when new listings are posted by this agency."
+    },
+    {
+      "name": "Share agency page",
+      "priority": "T",
+      "roles": ["job-seeker"],
+      "permission": "read",
+      "description": "Copies or shares a direct URL to the agency page."
+    }
+  ],
+
+  "relationships": [
+    {
+      "targetSlug": "job-listing",
+      "targetName": "Job Listing",
+      "mechanics": "Automatic. Job Listings carry the agency code, which maps back to this Agency object.",
+      "cardinality": "one-to-many (one Agency has many Job Listings; large agencies may have thousands of active listings)",
+      "sorts": "Default: openDate descending. Options: closeDate ascending, grade descending.",
+      "filters": "Series, location, grade, appointment type, work schedule, telework eligibility.",
+      "dependencies": "Optional for Agency. Agencies can exist with zero active listings. If Agency data is removed, listings retain the agency code but render in degraded state."
+    },
+    {
+      "targetSlug": "occupational-series",
+      "targetName": "Occupational Series",
+      "mechanics": "Derived. The set of series codes appearing on an agency's active listings determines which series are associated with it.",
+      "cardinality": "many-to-many (one Agency hires across many series; one series spans many agencies)",
+      "sorts": "Default: activeListingCount descending.",
+      "filters": "Grade, appointment type.",
+      "dependencies": "Optional. The relationship dissolves if an agency posts no listings in a given series."
+    },
+    {
+      "targetSlug": "location",
+      "targetName": "Location",
+      "mechanics": "Derived. The set of locations on an agency's active listings determines which locations are associated with it.",
+      "cardinality": "one-to-many (one Agency operates in many Locations)",
+      "sorts": "Default: activeListingCount descending.",
+      "filters": "Series, grade.",
+      "dependencies": "Optional. The relationship dissolves if an agency posts no listings at a given location."
+    }
+  ],
+
+  "nestedObjects": [],
+
+  "views": [
+    {
+      "viewType": "list",
+      "context": "An Agency in a browse or search context.",
+      "userIntent": "Identify agencies worth exploring for job opportunities.",
+      "shapes": {
+        "list": {
+          "visibleAttributes": ["name", "departmentName", "agencyLevel", "activeListingCount"],
+          "availableActions": ["Browse agency listings"]
+        }
+      }
+    },
+    {
+      "viewType": "detail",
+      "context": "An Agency detail page visited by a job seeker.",
+      "userIntent": "Learn about the agency and browse its open listings.",
+      "visibleAttributes": [
+        "name",
+        "code",
+        "departmentName",
+        "subElementName",
+        "agencyLevel",
+        "missionSummary",
+        "websiteUrl",
+        "logoUrl",
+        "activeListingCount"
+      ],
+      "availableActions": [
+        "Browse agency listings",
+        "Follow agency",
+        "Share agency page"
+      ]
+    }
+  ],
+
+  "stories": [
+    {
+      "title": "Job seeker explores a target agency",
+      "role": "job-seeker",
+      "action": "browses",
+      "object": "Agency",
+      "benefit": "finds relevant open positions at an organization they want to work for",
+      "whenClause": "When a job seeker knows which agency they want to work for",
+      "thenClause": "They see the agency's mission, current openings, and a way to follow for future listings"
+    }
+  ],
+
+  "businessRules": [
+    {
+      "title": "Hierarchy levels are distinct",
+      "description": "A listing always links to the most specific agency level available. A listing for the FDA links to the FDA (Agency level), not to HHS (Department level)."
+    },
+    {
+      "title": "Manual attributes may be absent",
+      "description": "missionSummary, websiteUrl, and logoUrl are manually curated. They will not be available for all agencies on launch. The detail page must degrade gracefully when these are absent."
+    },
+    {
+      "title": "activeListingCount is live",
+      "description": "activeListingCount is computed from the API at query time. It reflects the current open listing count, not a stored value."
+    }
+  ],
+
+  "lifecycle": {
+    "states": [
+      {
+        "name": "Active",
+        "description": "The agency is operational and may have open listings.",
+        "triggers": "Agency is added to the data set.",
+        "variant": "active"
+      },
+      {
+        "name": "Inactive",
+        "description": "The agency no longer exists or has been merged into another agency.",
+        "triggers": "Agency is removed from or flagged inactive in OPM data.",
+        "variant": "default"
+      }
+    ],
+    "transitions": [
+      {
+        "from": "Active",
+        "to": ["Inactive"]
+      }
+    ]
+  },
+
+  "relatedObjects": [
+    {
+      "slug": "occupational-series",
+      "name": "Occupational Series"
+    },
+    {
+      "slug": "location",
+      "name": "Location"
+    }
+  ]
+}

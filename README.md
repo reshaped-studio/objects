@@ -12,26 +12,28 @@ This library is a shared commons. An object defined for a job search redesign mi
 
 ```
 objects/
-├── SCHEMA.md              # the standard every object follows
+├── SCHEMA.ts                # TypeScript interfaces — source of truth for object structure
+├── object.schema.json       # JSON Schema — used for validation
 ├── objects/
 │   ├── _template/
-│   │   └── object.md      # copy this to create a new object
+│   │   ├── object.json    # structured data template
+│   │   └── object.md      # human-readable documentation template
 │   └── [domain]/
 │       └── [object-name]/
-│           ├── object.md
-│           └── relationships.md
-└── domains.md             # index of all domains and objects
+│           ├── object.json
+│           └── object.md
+└── domains.md               # index of all domains and objects
 ```
 
 ## Domains
 
-| Domain | Objects |
-|---|---|
+| Domain     | Objects                         |
+| ---------- | ------------------------------- |
 | Employment | [Browse](./objects/employment/) |
 
 ## Contributing
 
-See [SCHEMA.md](./SCHEMA.md) for the object definition standard. Copy `_template/object.md` to get started.
+See [SCHEMA.ts](./SCHEMA.ts) for the TypeScript interfaces and [object.schema.json](./object.schema.json) for the JSON Schema. Copy `objects/_template/` to get started.
 
 ---
 

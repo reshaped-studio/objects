@@ -1,0 +1,255 @@
+{
+  "identity": {
+    "slug": "occupational-series",
+    "name": "Occupational Series",
+    "objectType": "domain",
+    "category": "knowledge",
+    "definition": "A four-digit OPM classification code that groups federal positions by occupation type.",
+    "products": ["usajobs"]
+  },
+
+  "sipValidation": {
+    "structure": {
+      "pass": true,
+      "evidence": "seriesCode, seriesName, payPlan, grade range, typicalDuties, activeListingCount — sufficient for a detail page."
+    },
+    "instances": {
+      "pass": true,
+      "evidence": "IT Management (2210); Miscellaneous Administration and Program (0301); Border Patrol Agent (1896)."
+    },
+    "purpose": {
+      "pass": true,
+      "evidence": "Job seekers browse by series to find all open positions of a given occupation type across agencies."
+    },
+    "verdict": "Valid object. Distinct classification with structure, named instances, and a clear navigation purpose."
+  },
+
+  "synonyms": [
+    {
+      "term": "series",
+      "context": "Federal HR practitioners and job listings",
+      "notes": "Shortened form of Occupational Series. Common in API fields and HR documentation."
+    },
+    {
+      "term": "job series",
+      "context": "Applicant-facing copy and help center",
+      "notes": "Plain-language variant used on USAJobs.gov."
+    },
+    {
+      "term": "OPM series code",
+      "context": "Technical and HR documentation",
+      "notes": "Emphasizes that the code is defined and maintained by OPM."
+    }
+  ],
+
+  "attributes": [
+    {
+      "name": "seriesCode",
+      "dataType": "string",
+      "required": true,
+      "source": "API",
+      "description": "The four-digit OPM classification code.",
+      "example": "2210"
+    },
+    {
+      "name": "seriesName",
+      "dataType": "string",
+      "required": true,
+      "source": "API",
+      "description": "The full name of the occupational series as defined by OPM.",
+      "example": "Information Technology Management"
+    },
+    {
+      "name": "payPlan",
+      "dataType": "enum",
+      "required": true,
+      "source": "API",
+      "description": "The pay plan that applies to this series.",
+      "enumOptions": ["GS", "WG", "SES", "FWS", "Other"]
+    },
+    {
+      "name": "minimumGrade",
+      "dataType": "string",
+      "required": false,
+      "source": "API",
+      "description": "The lowest grade level typically offered for this series.",
+      "example": "5"
+    },
+    {
+      "name": "maximumGrade",
+      "dataType": "string",
+      "required": false,
+      "source": "API",
+      "description": "The highest grade level typically offered for this series.",
+      "example": "15"
+    },
+    {
+      "name": "typicalDuties",
+      "dataType": "text",
+      "required": false,
+      "source": "manual",
+      "description": "A general description of the occupation's responsibilities, drawn from OPM classification standards."
+    },
+    {
+      "name": "activeListingCount",
+      "dataType": "number",
+      "required": false,
+      "source": "computed",
+      "description": "Count of currently open Job Listings in this series. Computed at query time."
+    }
+  ],
+
+  "actions": [
+    {
+      "name": "Browse series listings",
+      "priority": "P",
+      "roles": ["job-seeker"],
+      "permission": "read",
+      "description": "Navigates to a filtered list of open Job Listings in this occupational series.",
+      "crossObject": {
+        "slug": "job-listing",
+        "name": "Job Listing"
+      }
+    },
+    {
+      "name": "Follow series",
+      "priority": "S",
+      "roles": ["authenticated-job-seeker"],
+      "permission": "read",
+      "description": "Subscribes to notifications when new listings are posted in this series."
+    },
+    {
+      "name": "Share series page",
+      "priority": "T",
+      "roles": ["job-seeker"],
+      "permission": "read",
+      "description": "Copies or shares a direct URL to the series page."
+    }
+  ],
+
+  "relationships": [
+    {
+      "targetSlug": "job-listing",
+      "targetName": "Job Listing",
+      "mechanics": "Automatic. Job Listings carry a series code that maps to this Occupational Series object.",
+      "cardinality": "one-to-many (one Occupational Series has many Job Listings; popular series such as 2210 may have thousands of active listings)",
+      "sorts": "Default: openDate descending. Options: salary descending, grade descending, closeDate ascending.",
+      "filters": "Agency, location, grade, appointment type, telework eligibility.",
+      "dependencies": "Optional for Occupational Series. A series can exist with zero active listings. Listings always retain their series code."
+    },
+    {
+      "targetSlug": "agency",
+      "targetName": "Agency",
+      "mechanics": "Derived. The set of agencies posting listings in this series determines the association.",
+      "cardinality": "many-to-many (one series spans many agencies; one agency hires across many series)",
+      "sorts": "Default: activeListingCount descending.",
+      "filters": "Location, grade.",
+      "dependencies": "Optional. The relationship dissolves if an agency posts no listings in this series."
+    },
+    {
+      "targetSlug": "salary-range",
+      "targetName": "Salary Range",
+      "mechanics": "Derived. The grade range of active listings in this series determines the associated salary ranges.",
+      "cardinality": "one-to-many (one Occupational Series spans multiple grade levels, each with a Salary Range)",
+      "sorts": "Default: grade ascending.",
+      "filters": "Pay scale.",
+      "dependencies": "Optional. Salary ranges are linked through active listings, not directly to the series."
+    }
+  ],
+
+  "nestedObjects": [],
+
+  "views": [
+    {
+      "viewType": "list",
+      "context": "An Occupational Series in a browse or search context.",
+      "userIntent": "Find the series that matches their occupation or career interest.",
+      "shapes": {
+        "list": {
+          "visibleAttributes": ["seriesCode", "seriesName", "payPlan", "minimumGrade", "maximumGrade", "activeListingCount"],
+          "availableActions": ["Browse series listings"]
+        }
+      }
+    },
+    {
+      "viewType": "detail",
+      "context": "An Occupational Series detail page visited by a job seeker.",
+      "userIntent": "Understand what the occupation involves and browse open positions.",
+      "visibleAttributes": [
+        "seriesCode",
+        "seriesName",
+        "payPlan",
+        "minimumGrade",
+        "maximumGrade",
+        "typicalDuties",
+        "activeListingCount"
+      ],
+      "availableActions": [
+        "Browse series listings",
+        "Follow series",
+        "Share series page"
+      ]
+    }
+  ],
+
+  "stories": [
+    {
+      "title": "Job seeker discovers all open IT positions across government",
+      "role": "job-seeker",
+      "action": "browses",
+      "object": "Occupational Series",
+      "benefit": "finds all open positions in their field without knowing which agencies are hiring",
+      "whenClause": "When a job seeker knows their occupation type but not which agency to target",
+      "thenClause": "They see all active listings for that series across all agencies and locations"
+    }
+  ],
+
+  "businessRules": [
+    {
+      "title": "Series codes are OPM-defined",
+      "description": "Series codes are maintained by OPM. The redesign does not create or modify series codes."
+    },
+    {
+      "title": "Grade range is typical, not binding",
+      "description": "minimumGrade and maximumGrade reflect the typical range for this series. Individual listings may advertise grades outside this range."
+    },
+    {
+      "title": "typicalDuties may be absent",
+      "description": "typicalDuties is manually curated from OPM classification standards. It will not be available for all series on launch. The detail page must degrade gracefully."
+    }
+  ],
+
+  "lifecycle": {
+    "states": [
+      {
+        "name": "Active",
+        "description": "The series is in current use by OPM and agencies.",
+        "triggers": "Series is included in OPM classification standards.",
+        "variant": "active"
+      },
+      {
+        "name": "Deprecated",
+        "description": "The series has been retired or replaced by OPM.",
+        "triggers": "OPM retires the series code.",
+        "variant": "default"
+      }
+    ],
+    "transitions": [
+      {
+        "from": "Active",
+        "to": ["Deprecated"]
+      }
+    ]
+  },
+
+  "relatedObjects": [
+    {
+      "slug": "agency",
+      "name": "Agency"
+    },
+    {
+      "slug": "salary-range",
+      "name": "Salary Range"
+    }
+  ]
+}

@@ -1,0 +1,220 @@
+{
+  "identity": {
+    "slug": "hiring-path",
+    "name": "Hiring Path",
+    "objectType": "domain",
+    "category": "knowledge",
+    "definition": "A classification that determines which job seekers are eligible to apply for a federal position.",
+    "products": ["usajobs"]
+  },
+
+  "sipValidation": {
+    "structure": {
+      "pass": true,
+      "evidence": "code, name, description, eligibilityCriteria, iconUrl, activeListingCount — sufficient for a full detail page."
+    },
+    "instances": {
+      "pass": true,
+      "evidence": "Open to the public; Federal employees (competitive service); Veterans; Military spouses; Students and recent graduates; National Guard members."
+    },
+    "purpose": {
+      "pass": true,
+      "evidence": "Job seekers filter listings by the hiring paths they qualify for to avoid applying for positions they are ineligible for."
+    },
+    "verdict": "Valid object. Named instances, consistent structure, and a filtering purpose that extends across all Job Listings."
+  },
+
+  "synonyms": [
+    {
+      "term": "eligibility",
+      "context": "Federal HR documentation",
+      "notes": "Broad term. Hiring path is the specific USAJobs implementation of eligibility categories."
+    },
+    {
+      "term": "hiring authority",
+      "context": "Agency HR practitioners",
+      "notes": "The legal authority under which a hiring path operates. More granular than hiring path."
+    }
+  ],
+
+  "attributes": [
+    {
+      "name": "code",
+      "dataType": "string",
+      "required": true,
+      "source": "manual",
+      "description": "URL-safe identifier for the hiring path.",
+      "example": "veterans"
+    },
+    {
+      "name": "name",
+      "dataType": "string",
+      "required": true,
+      "source": "manual",
+      "description": "Display name of the hiring path.",
+      "example": "Veterans"
+    },
+    {
+      "name": "description",
+      "dataType": "text",
+      "required": true,
+      "source": "manual",
+      "description": "Plain-language explanation of who qualifies for this hiring path.",
+      "example": "Veterans of the U.S. Armed Forces or an eligible family member"
+    },
+    {
+      "name": "eligibilityCriteria",
+      "dataType": "text",
+      "required": false,
+      "source": "manual",
+      "description": "Detailed criteria for determining eligibility. Manually curated."
+    },
+    {
+      "name": "iconUrl",
+      "dataType": "image",
+      "required": false,
+      "source": "manual",
+      "description": "Icon used in the UI to represent this hiring path."
+    },
+    {
+      "name": "activeListingCount",
+      "dataType": "number",
+      "required": false,
+      "source": "computed",
+      "description": "Count of currently open Job Listings on this hiring path. Computed at query time."
+    }
+  ],
+
+  "actions": [
+    {
+      "name": "Browse listings by hiring path",
+      "priority": "P",
+      "roles": ["job-seeker"],
+      "permission": "read",
+      "description": "Navigates to a filtered list of open Job Listings on this hiring path.",
+      "crossObject": {
+        "slug": "job-listing",
+        "name": "Job Listing"
+      }
+    },
+    {
+      "name": "Share hiring path page",
+      "priority": "S",
+      "roles": ["job-seeker"],
+      "permission": "read",
+      "description": "Copies or shares a direct URL to the hiring path page."
+    },
+    {
+      "name": "Learn about eligibility",
+      "priority": "T",
+      "roles": ["job-seeker"],
+      "permission": "read",
+      "description": "Links to detailed eligibility criteria for this hiring path."
+    }
+  ],
+
+  "relationships": [
+    {
+      "targetSlug": "job-listing",
+      "targetName": "Job Listing",
+      "mechanics": "Automatic. Job Listings carry one or more hiring path codes that map to this Hiring Path object. No manual curation required.",
+      "cardinality": "many-to-many (one Hiring Path applies to many Job Listings; one Job Listing carries multiple Hiring Paths)",
+      "sorts": "Default: openDate descending. Options: closeDate ascending, grade descending, salary descending.",
+      "filters": "Agency, series, location, grade, appointment type, work schedule.",
+      "dependencies": "Optional for Hiring Path. A Hiring Path can exist with zero active listings. Removing a listing does not affect the Hiring Path object."
+    }
+  ],
+
+  "nestedObjects": [],
+
+  "views": [
+    {
+      "viewType": "list",
+      "context": "A job seeker scanning available hiring paths.",
+      "userIntent": "Identify which hiring path applies to them and find listings they are eligible for.",
+      "shapes": {
+        "list": {
+          "visibleAttributes": ["iconUrl", "name", "description", "activeListingCount"],
+          "availableActions": ["Browse listings by hiring path"]
+        }
+      }
+    },
+    {
+      "viewType": "detail",
+      "context": "A job seeker who has navigated to a hiring path page.",
+      "userIntent": "Confirm their eligibility and browse open listings on this path.",
+      "visibleAttributes": [
+        "name",
+        "description",
+        "eligibilityCriteria",
+        "activeListingCount"
+      ],
+      "availableActions": [
+        "Browse listings by hiring path",
+        "Share hiring path page",
+        "Learn about eligibility"
+      ]
+    }
+  ],
+
+  "stories": [
+    {
+      "title": "Veteran finds positions they are eligible for",
+      "role": "job-seeker",
+      "action": "filters",
+      "object": "Hiring Path",
+      "benefit": "avoids applying to listings they cannot be considered for",
+      "whenClause": "When a job seeker knows they qualify under a veterans hiring path",
+      "thenClause": "They see only listings open to veterans across all agencies and series"
+    }
+  ],
+
+  "businessRules": [
+    {
+      "title": "Hiring paths are OPM-defined",
+      "description": "The redesign does not create or modify hiring path definitions."
+    },
+    {
+      "title": "A listing may have multiple hiring paths",
+      "description": "A job seeker who qualifies under any one of a listing's hiring paths is eligible to apply."
+    },
+    {
+      "title": "eligibilityCriteria may be absent",
+      "description": "Manually curated. The detail page must degrade gracefully when absent."
+    },
+    {
+      "title": "activeListingCount is live",
+      "description": "Computed from the API at query time, not stored."
+    }
+  ],
+
+  "lifecycle": {
+    "states": [
+      {
+        "name": "Active",
+        "description": "Hiring path is in current use by OPM and agencies.",
+        "triggers": "Defined by OPM and present in API data.",
+        "variant": "active"
+      },
+      {
+        "name": "Deprecated",
+        "description": "Hiring path has been retired or consolidated by OPM.",
+        "triggers": "OPM removes or replaces the hiring path.",
+        "variant": "default"
+      }
+    ],
+    "transitions": [
+      {
+        "from": "Active",
+        "to": ["Deprecated"]
+      }
+    ]
+  },
+
+  "relatedObjects": [
+    {
+      "slug": "job-listing",
+      "name": "Job Listing"
+    }
+  ]
+}
