@@ -37,4 +37,6 @@ See [SCHEMA.ts](./SCHEMA.ts) for the TypeScript interfaces and [object.schema.js
 
 ---
 
+Work in this repo uses the shared [Many Hats](https://github.com/reshaped-studio/many-hats) team, included as a submodule. Clone with `--recurse-submodules`. Start at [AGENTS.md](./AGENTS.md).
+
 Part of [Reshaped](https://reshaped.studio)
